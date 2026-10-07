@@ -1,5 +1,13 @@
 {
   "name": "csmju-grade-calculator-planner",
   "private": true,
-  "packageManager": "pnpm@9.15.9"
+  "packageManager": "pnpm@12.6.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm --filter backend build && pnpm --filter frontend build",
+    "test": "pnpm --filter backend test",
+    "checks": "./standards/scripts/run-all-checks.sh ."
+  }
 }
