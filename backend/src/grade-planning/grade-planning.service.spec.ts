@@ -239,4 +239,15 @@ describe('GradePlanningService', () => {
       prisma.course.findUnique,
     ).not.toHaveBeenCalled();
   });
+
+  it('returns zero required average after the target is already reached', async () => {
+    prisma.course.findUnique.mockResolvedValue({
+      id: courseId, coreUserId: 'user-001', courseCode: 'TEST', courseName: 'ทดสอบ',
+      gradeItems: [{ score: 100, maxScore: 100, weightPercentage: 85 }],
+    });
+    const result = await service.plan(courseId, 'user-001', 'A');
+    expect(result.currentWeightedScore).toBe(85);
+    expect(result.remainingWeight).toBe(15);
+    expect(result.requiredAverageOnRemaining).toBe(0);
+  });
 });

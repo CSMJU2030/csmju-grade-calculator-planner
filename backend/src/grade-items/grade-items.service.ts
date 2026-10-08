@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -104,6 +105,8 @@ export class GradeItemsService {
       throw new ForbiddenException('Forbidden');
     }
 
+    this.validateScores(data.name, data.score ?? null, data.maxScore, data.weightPercentage);
+
     return this.prisma.gradeItem.create({
       data: {
         courseId,
@@ -141,6 +144,13 @@ export class GradeItemsService {
     ) {
       throw new ForbiddenException('Forbidden');
     }
+
+    this.validateScores(
+      data.name ?? gradeItem.name,
+      data.score === undefined ? (gradeItem.score === null ? null : Number(gradeItem.score)) : data.score,
+      data.maxScore ?? Number(gradeItem.maxScore),
+      data.weightPercentage ?? Number(gradeItem.weightPercentage),
+    );
 
     return this.prisma.gradeItem.update({
       where: { id },
@@ -182,4 +192,19 @@ export class GradeItemsService {
       deleted: true,
     };
   }
+
+  private validateScores(name: string, score: number | null, maxScore: number, weight: number) {
+    const precise = (value: number) => Number.isFinite(value) && Math.abs(value * 100 - Math.round(value * 100)) < 0.000001;
+    if (!name.trim()) throw new BadRequestException('กรุณากรอกชื่อรายการคะแนน');
+    if (!precise(maxScore) || maxScore <= 0 || maxScore > 99999999.99) {
+      throw new BadRequestException('คะแนนเต็มต้องมากกว่า 0 และมีทศนิยมไม่เกิน 2 ตำแหน่ง');
+    }
+    if (score !== null && (!precise(score) || score < 0 || score > maxScore)) {
+      throw new BadRequestException('คะแนนต้องอยู่ระหว่าง 0 ถึงคะแนนเต็ม และมีทศนิยมไม่เกิน 2 ตำแหน่ง');
+    }
+    if (!precise(weight) || weight < 0 || weight > 100) {
+      throw new BadRequestException('น้ำหนักต้องอยู่ระหว่าง 0 ถึง 100 และมีทศนิยมไม่เกิน 2 ตำแหน่ง');
+    }
+  }
+
 }

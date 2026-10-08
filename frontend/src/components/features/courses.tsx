@@ -114,7 +114,7 @@ export default function CoursesPage() {
                 <tbody>{visible.map((course) => <tr key={course.id} className="border-b border-outline-variant/40 hover:bg-surface/50 last:border-0">
                   <td className={`${tdClass} whitespace-nowrap font-medium`}>{course.courseCode}</td><td className={tdClass}>{course.courseName}</td>
                   <td className={`${tdClass} tabular-nums`}>{formatNumber(course.credits)}</td><td className={`${tdClass} tabular-nums`}>{formatNumber(course.gradeItems?.length ?? 0)}</td>
-                  <td className={tdClass}><Link href={`/grade-planning?courseId=${encodeURIComponent(course.id)}`} className={`${actionClass} inline-flex items-center whitespace-nowrap text-primary-container hover:underline`}>วางแผนเกรด</Link></td>
+                  <td className={tdClass}><div className="flex flex-wrap gap-3"><Link href={`/grade-calculator?courseId=${encodeURIComponent(course.id)}`} className={`${actionClass} inline-flex items-center whitespace-nowrap text-primary-container hover:underline`}>บันทึกคะแนน</Link><Link href={`/grade-planning?courseId=${encodeURIComponent(course.id)}`} className={`${actionClass} inline-flex items-center whitespace-nowrap text-primary-container hover:underline`}>วางแผนเกรด</Link></div></td>
                 </tr>)}</tbody>
               </table>
             </div>

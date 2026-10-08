@@ -6,6 +6,7 @@ import { actionClass, headingClass, EmptyState } from "@/components/page-states"
 import { useUnsavedChanges } from "@/components/session-context";
 import { calculateGrade, gradeScale } from "@/lib/grade-calculation";
 import { formatNumber } from "@/lib/format";
+import SavedGradeItems from "@/components/features/saved-grade-items";
 import TaskEstimator from "@/components/features/task-estimator";
 import { resolveTaskGroup } from "@/lib/task-estimation";
 import type { TaskGroupDraft } from "@/lib/task-estimation";
@@ -25,7 +26,7 @@ function fieldError(item: Draft, field: Field): string {
   return value >= 0 && value <= Number(item.maxScore) ? "" : "คะแนนต้องอยู่ระหว่าง 0 ถึงคะแนนเต็ม";
 }
 
-export default function GradeCalculatorPage() {
+export default function GradeCalculatorPage({ initialCourseId }: { initialCourseId: string }) {
   const [items, setItems] = useState<Draft[]>([]);
   const [taskGroup, setTaskGroup] = useState<TaskGroupDraft>({ totalMaxScore: "", weight: "", tasks: [] });
   const [targetGrade, setTargetGrade] = useState("A");
@@ -74,7 +75,9 @@ export default function GradeCalculatorPage() {
   }
 
   return <div className="space-y-8">
-    <PageHeader title="คำนวณเกรด" description="ทดลองคำนวณคะแนนถ่วงน้ำหนักและเกรดเป้าหมาย" />
+    <PageHeader title="คำนวณเกรด" description="บันทึกคะแนนรายวิชา คำนวณคะแนนถ่วงน้ำหนัก และทดลองเกรดเป้าหมาย" />
+    <SavedGradeItems initialCourseId={initialCourseId} />
+    <h2 className={headingClass}>ทดลองคำนวณและประมาณคะแนน</h2>
     <div className={`${cardClass} space-y-2 p-6`}>
       <StatusBadge tone="info" label="คำนวณชั่วคราว" />
       <p className="text-body-md text-on-surface-variant">ข้อมูลในหน้านี้ยังไม่บันทึกลงรายวิชา และจะหายเมื่อโหลดหน้าใหม่ ช่องคะแนนที่เว้นว่างหมายถึงยังไม่ทราบคะแนน ส่วน 0 หมายถึงทราบแล้วว่าได้ศูนย์คะแนน</p>

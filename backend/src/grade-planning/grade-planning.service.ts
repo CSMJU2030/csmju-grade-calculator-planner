@@ -87,7 +87,7 @@ export class GradePlanningService {
     }
 
     const remainingWeight =
-      100 - completedWeight;
+      Math.max(0, 100 - completedWeight);
 
     const requiredScore =
       GRADE_THRESHOLDS[target];
@@ -102,9 +102,9 @@ export class GradePlanningService {
 
     if (remainingWeight > 0) {
       requiredAverageOnRemaining =
-        (additionalWeightedScore /
+        Math.max(0, (additionalWeightedScore /
           remainingWeight) *
-        100;
+        100);
     }
 
     const currentGrade =

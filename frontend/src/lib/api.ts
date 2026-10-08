@@ -118,3 +118,33 @@ export async function getGradePlanning(courseId: string, targetGrade: string, si
 export function asApiError(error: unknown): ApiError {
   return error instanceof ApiError ? error : new ApiError("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง", 502);
 }
+
+
+export async function getGradeItems(courseId: string, signal?: AbortSignal): Promise<GradeItem[]> {
+  const body = await requestApi<{ success: boolean; data: GradeItem[] }>(
+    `/api/frontend/grade-items?courseId=${encodeURIComponent(courseId)}`, { signal },
+  );
+  return body.data;
+}
+
+export async function createGradeItem(courseId: string, input: import("./grade-item-input").GradeItemInput): Promise<GradeItem> {
+  const body = await requestApi<{ success: boolean; data: GradeItem }>(
+    `/api/frontend/grade-items?courseId=${encodeURIComponent(courseId)}`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+    },
+  );
+  return body.data;
+}
+
+export async function updateGradeItem(id: string, input: import("./grade-item-input").GradeItemInput): Promise<GradeItem> {
+  const body = await requestApi<{ success: boolean; data: GradeItem }>(
+    `/api/frontend/grade-items?id=${encodeURIComponent(id)}`, {
+      method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
+    },
+  );
+  return body.data;
+}
+
+export async function deleteGradeItem(id: string): Promise<void> {
+  await requestApi(`/api/frontend/grade-items?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+}

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
@@ -280,5 +281,38 @@ describe('GradeItemsService', () => {
     ).rejects.toThrow(ForbiddenException);
 
     expect(prisma.gradeItem.delete).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { name: ' ', score: null, maxScore: 20, weightPercentage: 10 },
+    { name: 'งาน', score: null, maxScore: 0, weightPercentage: 10 },
+    { name: 'งาน', score: 21, maxScore: 20, weightPercentage: 10 },
+    { name: 'งาน', score: -1, maxScore: 20, weightPercentage: 10 },
+    { name: 'งาน', score: 1.234, maxScore: 20, weightPercentage: 10 },
+    { name: 'งาน', score: null, maxScore: 20, weightPercentage: 101 },
+  ])('rejects invalid persisted scores before writing: %j', async (input) => {
+    prisma.course.findUnique.mockResolvedValue({ id: courseId, coreUserId: 'user-001' });
+    await expect(service.createForCourse(courseId, 'user-001', input)).rejects.toThrow(BadRequestException);
+    expect(prisma.gradeItem.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects reducing maxScore below the existing score in a partial update', async () => {
+    prisma.gradeItem.findUnique.mockResolvedValue({
+      id: gradeItemId, name: 'งาน', score: 18, maxScore: 20, weightPercentage: 10,
+      course: { coreUserId: 'user-001' },
+    });
+    await expect(service.updateByOwner(gradeItemId, 'user-001', { maxScore: 15 })).rejects.toThrow(BadRequestException);
+    expect(prisma.gradeItem.update).not.toHaveBeenCalled();
+  });
+
+  it('preserves zero and explicitly clears a score with null', async () => {
+    prisma.gradeItem.findUnique.mockResolvedValue({
+      id: gradeItemId, name: 'งาน', score: 18, maxScore: 20, weightPercentage: 10,
+      course: { coreUserId: 'user-001' },
+    });
+    await service.updateByOwner(gradeItemId, 'user-001', { score: 0 });
+    expect(prisma.gradeItem.update).toHaveBeenLastCalledWith({ where: { id: gradeItemId }, data: { score: 0 } });
+    await service.updateByOwner(gradeItemId, 'user-001', { score: null });
+    expect(prisma.gradeItem.update).toHaveBeenLastCalledWith({ where: { id: gradeItemId }, data: { score: null } });
   });
 });
