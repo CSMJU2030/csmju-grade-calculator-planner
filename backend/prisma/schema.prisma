@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Course {
+  id          String     @id @default(uuid()) @db.Uuid
+  coreUserId  String     @map("owner_core_user_id")
+  courseCode  String     @map("course_code")
+  courseName  String     @map("course_name")
+  credits     Int
+  gradeItems  GradeItem[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@index([coreUserId])
+  @@map("courses")
+}
+
+model GradeItem {
+  id               String   @id @default(uuid()) @db.Uuid
+  courseId         String   @map("course_id") @db.Uuid
+  name             String
+  score            Decimal? @db.Decimal(10, 2)
+  maxScore         Decimal  @map("max_score") @db.Decimal(10, 2)
+  weightPercentage Decimal  @map("weight_percentage") @db.Decimal(5, 2)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@map("grade_items")
+}
