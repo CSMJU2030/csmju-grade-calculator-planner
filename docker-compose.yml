@@ -59,8 +59,6 @@ services:
         condition: service_healthy
     tmpfs: ["/tmp:size=32m"]
     mem_limit: 512m
-    # Loopback diagnostics in the local rehearsal, never a server port mapping.
-    ports: ["127.0.0.1:4214:4000"]
 
   web:
     <<: *hardening
