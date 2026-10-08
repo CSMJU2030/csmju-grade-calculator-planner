@@ -10,7 +10,7 @@ datasource db {
 
 model Course {
   id          String     @id @default(uuid()) @db.Uuid
-  coreUserId  String     @map("core_user_id")
+  coreUserId  String     @map("owner_core_user_id")
   courseCode  String     @map("course_code")
   courseName  String     @map("course_name")
   credits     Int

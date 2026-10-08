@@ -22,7 +22,7 @@ import { CreateGradeItemDto } from './dto/create-grade-item.dto';
 import { UpdateGradeItemDto } from './dto/update-grade-item.dto';
 
 @UseGuards(AuthGuard, PermissionsGuard)
-@Controller('api/v1')
+@Controller('v1')
 export class GradeItemsController {
   constructor(
     private readonly gradeItemsService: GradeItemsService,

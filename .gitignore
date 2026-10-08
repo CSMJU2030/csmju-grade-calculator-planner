@@ -11,3 +11,7 @@ generated/
 *.pem
 *.key
 !.env.example
+.DS_Store
+*.tsbuildinfo
+.env.*
+!.env.example

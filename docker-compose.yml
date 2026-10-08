@@ -1,0 +1,86 @@
+# Local rehearsal only. Production uses the central PostgreSQL database
+# and GHCR images under DevOps management (standards/docs/deployment.md).
+name: csmju-grade-calculator-planner-local
+
+x-hardening: &hardening
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: csmju_grade_calculator_planner
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run apply-grade-deploy.py to prepare local .env}
+      TZ: Asia/Bangkok
+    volumes:
+      - grade-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d csmju_grade_calculator_planner"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+    mem_limit: 256m
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  api:
+    <<: *hardening
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Local database password is required}@db:5432/csmju_grade_calculator_planner
+      DATABASE_POOL_MAX: "5"
+      CORE_HUB_URL: https://csmju2030.jowave.com
+      CORE_HUB_JWKS_URL: https://csmju2030.jowave.com/api/v1/.well-known/jwks.json
+      CORE_HUB_WEB_URL: https://csmju2030.jowave.com
+      CORE_HUB_ISSUER: core-hub
+      CORE_HUB_AUDIENCE: csmju2030
+      SUBSYSTEM_ID: csmju-grade-calculator-planner
+      TZ: Asia/Bangkok
+    depends_on:
+      db:
+        condition: service_healthy
+    tmpfs: ["/tmp:size=32m"]
+    mem_limit: 512m
+    # Loopback diagnostics in the local rehearsal, never a server port mapping.
+    ports: ["127.0.0.1:4214:4000"]
+
+  web:
+    <<: *hardening
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        BACKEND_URL: http://api:4000
+        CORE_HUB_WEB_URL: https://csmju2030.jowave.com
+    environment:
+      BACKEND_URL: http://api:4000
+      CORE_HUB_WEB_URL: https://csmju2030.jowave.com
+      SUBSYSTEM_ID: csmju-grade-calculator-planner
+      TZ: Asia/Bangkok
+    depends_on:
+      api:
+        condition: service_healthy
+    tmpfs: ["/tmp:size=32m", "/app/frontend/.next/cache:size=64m"]
+    mem_limit: 384m
+    ports: ["127.0.0.1:3214:3000"]
+
+volumes:
+  grade-db-data:

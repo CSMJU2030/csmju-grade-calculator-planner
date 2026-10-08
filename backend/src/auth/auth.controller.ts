@@ -244,7 +244,7 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
-  @Get('api/v1/me')
+  @Get('v1/me')
   @Header('Cache-Control', 'no-store')
   getMe(@Req() request: Request) {
     const user = request.user;

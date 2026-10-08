@@ -17,7 +17,7 @@ import { Permission } from '../auth/permissions';
 import { GradePlanningService } from './grade-planning.service';
 
 @UseGuards(AuthGuard, PermissionsGuard)
-@Controller('api/v1/courses')
+@Controller('v1/courses')
 export class GradePlanningController {
   constructor(
     private readonly gradePlanningService: GradePlanningService,

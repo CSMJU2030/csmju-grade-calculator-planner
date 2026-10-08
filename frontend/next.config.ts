@@ -2,7 +2,7 @@ import path from "node:path";
 import type { NextConfig } from "next";
 
 const BACKEND_URL =
-  process.env.BACKEND_URL ?? "http://127.0.0.1:3002";
+  process.env.BACKEND_URL ?? "http://127.0.0.1:4214";
 
 const nextConfig: NextConfig = {
   output: "standalone",

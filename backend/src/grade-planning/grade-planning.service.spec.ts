@@ -25,7 +25,7 @@ describe('GradePlanningService', () => {
     jest.clearAllMocks();
 
     service = new GradePlanningService(
-      prisma as any,
+      prisma as unknown as ConstructorParameters<typeof GradePlanningService>[0],
     );
   });
 

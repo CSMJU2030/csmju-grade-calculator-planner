@@ -3,7 +3,7 @@ import type { CurrentUser } from "./user";
 
 // Server-side request to this subsystem only; never expose cookies or tokens in props.
 export async function getCurrentUser(): Promise<CurrentUser | null> {
-  const baseUrl = (process.env.BACKEND_URL ?? "http://127.0.0.1:3002").replace(/\/+$/, "");
+  const baseUrl = (process.env.BACKEND_URL ?? "http://127.0.0.1:4214").replace(/\/+$/, "");
   const cookie = (await headers()).get("cookie");
   if (!cookie) return null;
   try {

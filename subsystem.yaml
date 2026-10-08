@@ -1,8 +1,8 @@
 # .standards-version is the authoritative standards pin (currently 1.8.4).
-# Temporary frontend port: replace after PL confirms the team's 32xx/42xx ports.
+# Production origin assigned by PL; local development uses frontend 3214 / backend 4214.
 name: csmju-grade-calculator-planner
 conformance_level: L3
-base_url: http://localhost:3000
+base_url: https://csmju-grade-calculator-planner.jowave.com
 core_hub_url: https://csmju2030.jowave.com
 core_hub_web_url: https://csmju2030.jowave.com
 callback_path: /auth/callback

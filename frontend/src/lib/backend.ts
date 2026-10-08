@@ -6,7 +6,7 @@ export async function proxyBackend(
 ): Promise<Response> {
   const baseUrl = (
     process.env.BACKEND_URL ??
-    "http://127.0.0.1:3002"
+    "http://127.0.0.1:4214"
   ).replace(/\/+$/, "");
 
   const headers = new Headers(options.headers);

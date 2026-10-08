@@ -31,7 +31,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          {courses.length === 0 && <EmptyState title="ยังไม่มีรายวิชา" description={canCreate ? "เริ่มต้นด้วยการเพิ่มรายวิชาแรก" : "ยังไม่มีรายวิชาของบัญชีนี้ กรุณาติดต่อผู้ดูแลระบบย่อย"} href={canCreate ? "/courses#add-course" : "/courses"} action={canCreate ? "เพิ่มรายวิชา" : "ดูรายวิชา"} />}
+          {courses.length === 0 && <EmptyState title="ยังไม่มีรายวิชา" description={canCreate ? "เริ่มต้นด้วยการเพิ่มรายวิชาแรก" : "ยังไม่มีรายวิชาของบัญชีนี้ กรุณาติดต่อผู้ดูแลระบบย่อย"} href={canCreate ? "/courses#course-form" : "/courses"} action={canCreate ? "เพิ่มรายวิชา" : "ดูรายวิชา"} />}
         </>
       )}
       <div className={`${cardClass} space-y-4 p-6`}>

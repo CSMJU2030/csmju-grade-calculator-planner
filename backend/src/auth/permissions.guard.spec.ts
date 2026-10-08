@@ -21,7 +21,7 @@ describe('PermissionsGuard', () => {
     );
   });
 
-  function createContext(user: any): ExecutionContext {
+  function createContext(user: unknown): ExecutionContext {
     return {
       switchToHttp: () => ({
         getRequest: () => ({
@@ -30,7 +30,7 @@ describe('PermissionsGuard', () => {
       }),
       getHandler: () => ({}),
       getClass: () => ({}),
-    } as ExecutionContext;
+    } as unknown as ExecutionContext;
   }
 
   describe('course:read:own', () => {

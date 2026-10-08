@@ -70,7 +70,7 @@ export default function CoursesPage() {
     <div className="space-y-8">
       <PageHeader title="รายวิชา" description="ดูรายวิชาของคุณและข้อมูลที่บันทึกไว้" />
       {success && <div role="status" className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-4"><StatusBadge tone="success" label="บันทึกสำเร็จ" /><p className="mt-2 text-body-md">{success}</p></div>}
-      {canCreate && <form id="add-course" noValidate onSubmit={submit} onChange={() => setDirty(true)} className={`${cardClass} scroll-mt-20 space-y-4 p-6`}>
+      {canCreate && <form id="course-form" noValidate onSubmit={submit} onChange={() => setDirty(true)} className={`${cardClass} scroll-mt-20 space-y-4 p-6`}>
         <h2 className={headingClass}>เพิ่มรายวิชาใหม่</h2>
         <p className="text-body-md text-on-surface-variant">ช่องที่มี * จำเป็นต้องกรอก</p>
         {Object.entries(labels).map(([name, label]) => (
@@ -98,7 +98,7 @@ export default function CoursesPage() {
         <div className="flex flex-wrap items-center justify-between gap-3"><h2 id="course-list-title" className={headingClass}>รายวิชาของฉัน</h2><button type="button" onClick={reload} disabled={loading} aria-describedby={loading ? "course-list-loading" : undefined} className={`${secondaryButtonClass} ${actionClass}`}>โหลดใหม่</button></div>
         {loading && <span id="course-list-loading" className="sr-only">กำลังโหลดข้อมูล...</span>}
         {error ? <ErrorNotice error={error} next="/courses" retry={reload} /> : loading ? <LoadingState /> : courses.length === 0 ? (
-          <EmptyState title="ยังไม่มีรายวิชา" description={canCreate ? "เพิ่มรายวิชาแรกด้วยฟอร์มด้านบน" : "ยังไม่มีรายวิชาของบัญชีนี้ กรุณาติดต่อผู้ดูแลระบบย่อย"} href={canCreate ? "#add-course" : "/"} action={canCreate ? "เพิ่มรายวิชา" : "กลับหน้าหลัก"} />
+          <EmptyState title="ยังไม่มีรายวิชา" description={canCreate ? "เพิ่มรายวิชาแรกด้วยฟอร์มด้านบน" : "ยังไม่มีรายวิชาของบัญชีนี้ กรุณาติดต่อผู้ดูแลระบบย่อย"} href={canCreate ? "#course-form" : "/"} action={canCreate ? "เพิ่มรายวิชา" : "กลับหน้าหลัก"} />
         ) : <div className={cardClass}>
           <div className="space-y-2 border-b border-outline-variant/40 px-6 py-5">
             <label htmlFor="course-search" className="block text-label-md">ค้นหารายวิชา</label>

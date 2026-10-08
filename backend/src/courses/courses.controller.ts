@@ -24,7 +24,7 @@ import { RequirePermissions } from '../auth/permissions.decorator';
 import { Permission } from '../auth/permissions';
 
 @UseGuards(AuthGuard, PermissionsGuard)
-@Controller('api/v1/courses')
+@Controller('v1/courses')
 export class CoursesController {
   constructor(
     private readonly coursesService: CoursesService,
