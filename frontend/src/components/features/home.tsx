@@ -15,7 +15,7 @@ export default function Home() {
   const stats = [
     { label: "รายวิชา", value: courses.length, note: "จำนวนรายวิชาทั้งหมด", Icon: MenuBookIcon },
     { label: "รายการคะแนน", value: courses.reduce((sum, course) => sum + (course.gradeItems?.length ?? 0), 0), note: "รายการที่บันทึกไว้ในรายวิชา", Icon: DescriptionIcon },
-    { label: "หน่วยกิต", value: courses.reduce((sum, course) => sum + course.credits, 0), note: "หน่วยกิตของรายวิชาทั้งหมด", Icon: SchoolIcon },
+    { label: "หน่วยกิต", value: courses.reduce((sum, course) => sum + (course.credits ?? 0), 0), note: "รวมเฉพาะวิชาที่ระบุหน่วยกิต", Icon: SchoolIcon },
   ];
   return (
     <div className="space-y-8">

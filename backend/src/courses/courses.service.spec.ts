@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
@@ -281,4 +282,39 @@ describe('CoursesService', () => {
       expect(prisma.course.delete).not.toHaveBeenCalled();
     });
   });
+  describe('personal course labels', () => {
+    it('creates a name-only course without inventing a code or credits', async () => {
+      await service.create('student-owner', { courseName: '  วิชาของฉัน  ' });
+      expect(prisma.course.create).toHaveBeenCalledWith({
+        data: { coreUserId: 'student-owner', courseName: 'วิชาของฉัน', courseCode: null, credits: null },
+        include: { gradeItems: true },
+      });
+    });
+
+    it('normalizes empty optional code while retaining valid credits', async () => {
+      await service.create('student-owner', { courseName: 'วิชา A', courseCode: ' ', credits: 3 });
+      expect(prisma.course.create).toHaveBeenCalledWith(expect.objectContaining({
+        data: { coreUserId: 'student-owner', courseName: 'วิชา A', courseCode: null, credits: 3 },
+      }));
+    });
+
+    it('rejects an empty name before writing', async () => {
+      await expect(service.create('student-owner', { courseName: ' ' })).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.course.create).not.toHaveBeenCalled();
+    });
+
+    it.each([0, -1, 1.5, NaN])('rejects invalid specified credits %s', async (credits) => {
+      await expect(service.create('student-owner', { courseName: 'วิชา A', credits })).rejects.toBeInstanceOf(BadRequestException);
+      expect(prisma.course.create).not.toHaveBeenCalled();
+    });
+
+    it('clears optional details without replacing the owner', async () => {
+      prisma.course.findUnique.mockResolvedValue({ id: courseId, coreUserId: 'student-owner' });
+      await service.updateByOwner(courseId, 'student-owner', { courseCode: null, credits: null });
+      expect(prisma.course.update).toHaveBeenCalledWith({
+        where: { id: courseId }, data: { courseCode: null, credits: null }, include: { gradeItems: true },
+      });
+    });
+  });
+
 });

@@ -10,9 +10,9 @@ export interface GradeItem {
 export interface Course {
   id: string;
   coreUserId: string;
-  courseCode: string;
+  courseCode: string | null;
   courseName: string;
-  credits: number;
+  credits: number | null;
   gradeItems?: GradeItem[];
 }
 
@@ -24,7 +24,7 @@ export interface CoursesResponse {
 
 export interface GradePlanning {
   courseId: string;
-  courseCode: string;
+  courseCode: string | null;
   courseName: string;
   targetGrade: string;
   targetScore: number;
@@ -101,7 +101,7 @@ export async function getAllCourses(signal?: AbortSignal): Promise<Course[]> {
   return Array.from(new Map(courses.map((course) => [course.id, course])).values());
 }
 
-export async function createCourse(input: { courseCode: string; courseName: string; credits: number }): Promise<Course> {
+export async function createCourse(input: { courseName: string; courseCode?: string | null; credits?: number | null }): Promise<Course> {
   const body = await requestApi<{ success: boolean; data: Course }>("/api/frontend/courses", {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input),
   });

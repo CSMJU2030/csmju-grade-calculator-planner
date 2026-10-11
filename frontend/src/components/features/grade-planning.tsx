@@ -53,7 +53,7 @@ export default function GradePlanningPage({ initialCourseId }: { initialCourseId
             <div className={`${cardClass} grid gap-6 p-6 md:grid-cols-2`}>
               <label className="text-body-md font-medium">รายวิชา
                 <select value={courseId} onChange={(event) => setChosenId(event.target.value)} className={`${inputClass} mt-2`}>
-                  {courses.map((course) => <option key={course.id} value={course.id}>{course.courseCode} — {course.courseName}</option>)}
+                  {courses.map((course) => <option key={course.id} value={course.id}>{course.courseCode ? `${course.courseCode} — ` : ""}{course.courseName}</option>)}
                 </select>
               </label>
               <label className="text-body-md font-medium">เกรดเป้าหมาย

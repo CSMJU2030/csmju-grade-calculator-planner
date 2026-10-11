@@ -23,20 +23,24 @@ export async function POST(request: Request) {
     return apiError("ข้อมูลรายวิชาไม่ถูกต้อง", 400);
   }
   const input = body as Record<string, unknown>;
-  if (typeof input.courseCode !== "string" || !input.courseCode.trim() ||
-      typeof input.courseName !== "string" || !input.courseName.trim() ||
-      typeof input.credits !== "number" || !Number.isInteger(input.credits) ||
-      input.credits < 1) {
-    return apiError("กรอกรหัสวิชา ชื่อวิชา และหน่วยกิตเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป", 400);
+  if (typeof input.courseName !== "string" || !input.courseName.trim()) {
+    return apiError("กรุณากรอกชื่อวิชา", 400);
+  }
+  if (input.courseCode !== undefined && input.courseCode !== null && typeof input.courseCode !== "string") {
+    return apiError("รหัสวิชาต้องเป็นข้อความ", 400);
+  }
+  if (input.credits !== undefined && input.credits !== null &&
+      (typeof input.credits !== "number" || !Number.isInteger(input.credits) || input.credits < 1)) {
+    return apiError("หน่วยกิตต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป", 400);
   }
   // Backend เป็นผู้ระบุเจ้าของจาก session ไม่รับ user ID จากฟอร์ม
   return proxyBackend(request, "/api/v1/courses", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      courseCode: input.courseCode.trim(),
+      courseCode: typeof input.courseCode === "string" ? input.courseCode.trim() || null : null,
       courseName: input.courseName.trim(),
-      credits: input.credits,
+      credits: input.credits ?? null,
     }),
   });
 }
