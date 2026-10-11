@@ -120,7 +120,7 @@ export default function SavedGradeItems({ initialCourseId }: { initialCourseId: 
       <div className={`${cardClass} space-y-4 p-6`}>
         <label htmlFor="saved-course" className="block text-label-md">รายวิชา</label>
         <select id="saved-course" value={courseId} onChange={(event) => choose(event.target.value)} disabled={busy} aria-describedby={busy ? "saved-busy" : undefined} className={inputClass}>
-          {courses.map((course) => <option key={course.id} value={course.id}>{course.courseCode} — {course.courseName}</option>)}
+          {courses.map((course) => <option key={course.id} value={course.id}>{course.courseCode ? `${course.courseCode} — ` : ""}{course.courseName}</option>)}
         </select>
         <div className="flex flex-wrap gap-3">
           <button type="button" disabled={busy || fetching} aria-describedby="saved-reload-hint" onClick={() => { if (canDiscard()) { reset(); setRevision((value) => value + 1); } }} className={`${secondaryButtonClass} ${actionClass}`}>โหลดใหม่</button>

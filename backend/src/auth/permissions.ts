@@ -17,6 +17,7 @@ export enum Permission {
 export const ROLE_PERMISSIONS: Record<SubsystemRole, Permission[]> = {
   STUDENT: [
     Permission.COURSE_READ_OWN,
+    Permission.COURSE_CREATE,
     Permission.GRADE_ITEM_READ_OWN,
     Permission.GRADE_ITEM_CREATE_OWN,
     Permission.GRADE_ITEM_UPDATE_OWN,

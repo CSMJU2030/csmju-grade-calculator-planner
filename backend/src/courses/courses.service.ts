@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Inject,
   Injectable,
@@ -9,15 +10,15 @@ import type { PrismaService } from '../prisma/prisma.service';
 import { PRISMA_SERVICE } from '../prisma/prisma.token';
 
 interface CreateCourseData {
-  courseCode: string;
+  courseCode?: string | null;
   courseName: string;
-  credits: number;
+  credits?: number | null;
 }
 
 interface UpdateCourseData {
-  courseCode?: string;
+  courseCode?: string | null;
   courseName?: string;
-  credits?: number;
+  credits?: number | null;
 }
 
 @Injectable()
@@ -96,12 +97,13 @@ export class CoursesService {
     coreUserId: string,
     data: CreateCourseData,
   ) {
+    const details = this.validateDetails(data);
     return this.prisma.course.create({
       data: {
         coreUserId,
-        courseCode: data.courseCode,
-        courseName: data.courseName,
-        credits: data.credits,
+        courseCode: details.courseCode ?? null,
+        courseName: details.courseName as string,
+        credits: details.credits ?? null,
       },
       include: {
         gradeItems: true,
@@ -131,11 +133,34 @@ export class CoursesService {
 
     return this.prisma.course.update({
       where: { id },
-      data,
+      data: this.validateDetails(data),
       include: {
         gradeItems: true,
       },
     });
+  }
+
+  private validateDetails(data: UpdateCourseData): UpdateCourseData {
+    const result: UpdateCourseData = {};
+    if (data.courseName !== undefined) {
+      if (typeof data.courseName !== 'string' || !data.courseName.trim()) {
+        throw new BadRequestException('กรุณากรอกชื่อวิชา');
+      }
+      result.courseName = data.courseName.trim();
+    }
+    if (data.courseCode !== undefined) {
+      if (data.courseCode !== null && typeof data.courseCode !== 'string') {
+        throw new BadRequestException('รหัสวิชาต้องเป็นข้อความ');
+      }
+      result.courseCode = data.courseCode?.trim() || null;
+    }
+    if (data.credits !== undefined) {
+      if (data.credits !== null && (!Number.isInteger(data.credits) || data.credits < 1)) {
+        throw new BadRequestException('หน่วยกิตต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป');
+      }
+      result.credits = data.credits;
+    }
+    return result;
   }
 
   async deleteByOwner(id: string, coreUserId: string) {

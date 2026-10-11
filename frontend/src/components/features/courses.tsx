@@ -10,8 +10,9 @@ import { ApiError, asApiError, createCourse } from "@/lib/api";
 import { useCourses } from "@/lib/use-courses";
 import { formatNumber } from "@/lib/format";
 
-const labels: Record<string, string> = { courseCode: "รหัสวิชา", courseName: "ชื่อวิชา", credits: "หน่วยกิต" };
+const labels: Record<string, string> = { courseName: "ชื่อวิชา", courseCode: "รหัสวิชา", credits: "หน่วยกิต" };
 const validate = (name: string, value: string) => {
+  if (name !== "courseName" && !value.trim()) return "";
   if (name === "credits") return value.trim() && Number.isInteger(Number(value)) && Number(value) >= 1 ? "" : "กรุณาระบุหน่วยกิตเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป";
   return value.trim() ? "" : `กรุณากรอก${labels[name]}`;
 };
@@ -48,9 +49,9 @@ export default function CoursesPage() {
     if (first) { (form.elements.namedItem(first) as HTMLInputElement)?.focus(); return; }
     pending.current = true; setSubmitting(true);
     try {
-      await createCourse({ ...values, credits: Number(values.credits) });
+      await createCourse({ courseName: values.courseName, courseCode: values.courseCode || null, credits: values.credits ? Number(values.credits) : null });
       form.reset(); setDirty(false); setFields({});
-      setSuccess(`เพิ่มรายวิชา ${values.courseCode} สำเร็จแล้ว`); reload();
+      setSuccess(`เพิ่มรายวิชา ${values.courseName} สำเร็จแล้ว`); reload();
     } catch (failure) {
       const apiError = asApiError(failure);
       setSubmitError(apiError);
@@ -61,24 +62,24 @@ export default function CoursesPage() {
     } finally { pending.current = false; setSubmitting(false); }
   }
 
-  const found = courses.filter((course) => `${course.courseCode} ${course.courseName}`.toLocaleLowerCase("th-TH").includes(query.trim().toLocaleLowerCase("th-TH")));
+  const found = courses.filter((course) => `${course.courseCode ?? ""} ${course.courseName}`.toLocaleLowerCase("th-TH").includes(query.trim().toLocaleLowerCase("th-TH")));
   const pages = Math.max(1, Math.ceil(found.length / 20));
   const currentPage = Math.min(page, pages);
   const visible = found.slice((currentPage - 1) * 20, currentPage * 20);
 
   return (
     <div className="space-y-8">
-      <PageHeader title="รายวิชา" description="ดูรายวิชาของคุณและข้อมูลที่บันทึกไว้" />
+      <PageHeader title="รายวิชา" description="ตั้งชื่อวิชาของคุณ แล้วบันทึกคะแนนเพื่อคำนวณและวางแผนเกรด" />
       {success && <div role="status" className="rounded-lg border border-outline-variant/40 bg-surface-container-lowest p-4"><StatusBadge tone="success" label="บันทึกสำเร็จ" /><p className="mt-2 text-body-md">{success}</p></div>}
       {canCreate && <form id="course-form" noValidate onSubmit={submit} onChange={() => setDirty(true)} className={`${cardClass} scroll-mt-20 space-y-4 p-6`}>
         <h2 className={headingClass}>เพิ่มรายวิชาใหม่</h2>
-        <p className="text-body-md text-on-surface-variant">ช่องที่มี * จำเป็นต้องกรอก</p>
+        <p className="text-body-md text-on-surface-variant">กรอกชื่อวิชาเพื่อเริ่มใช้งาน รหัสวิชาและหน่วยกิตไม่บังคับ ช่องที่มี * จำเป็นต้องกรอก</p>
         {Object.entries(labels).map(([name, label]) => (
           <div key={name} className="space-y-2">
-            <label htmlFor={`course-${name}`} className="block text-label-md">{label} *</label>
+            <label htmlFor={`course-${name}`} className="block text-label-md">{label}{name === "courseName" ? " *" : " (ไม่บังคับ)"}</label>
             <input id={`course-${name}`} name={name} type={name === "credits" ? "number" : "text"}
-              required aria-required="true" min={name === "credits" ? 1 : undefined} step={name === "credits" ? 1 : undefined}
-              defaultValue={name === "credits" ? "3" : undefined} readOnly={submitting}
+              required={name === "courseName"} aria-required={name === "courseName"} min={name === "credits" ? 1 : undefined} step={name === "credits" ? 1 : undefined}
+              readOnly={submitting}
               aria-invalid={Boolean(fields[name])} aria-describedby={fields[name] ? `error-${name}` : undefined}
               onBlur={(event) => setFields((current) => ({ ...current, [name]: validate(name, event.target.value) }))}
               className={`${inputClass} ${fields[name] ? "input-error" : ""}`} />
@@ -112,8 +113,8 @@ export default function CoursesPage() {
                   {["รหัสวิชา", "ชื่อวิชา", "หน่วยกิต", "รายการคะแนน", "จัดการ"].map((label) => <th key={label} scope="col" className={thClass}>{label}</th>)}
                 </tr></thead>
                 <tbody>{visible.map((course) => <tr key={course.id} className="border-b border-outline-variant/40 hover:bg-surface/50 last:border-0">
-                  <td className={`${tdClass} whitespace-nowrap font-medium`}>{course.courseCode}</td><td className={tdClass}>{course.courseName}</td>
-                  <td className={`${tdClass} tabular-nums`}>{formatNumber(course.credits)}</td><td className={`${tdClass} tabular-nums`}>{formatNumber(course.gradeItems?.length ?? 0)}</td>
+                  <td className={`${tdClass} whitespace-nowrap font-medium`}>{course.courseCode ?? "—"}</td><td className={tdClass}>{course.courseName}</td>
+                  <td className={`${tdClass} tabular-nums`}>{course.credits === null ? "—" : formatNumber(course.credits)}</td><td className={`${tdClass} tabular-nums`}>{formatNumber(course.gradeItems?.length ?? 0)}</td>
                   <td className={tdClass}><div className="flex flex-wrap gap-3"><Link href={`/grade-calculator?courseId=${encodeURIComponent(course.id)}`} className={`${actionClass} inline-flex items-center whitespace-nowrap text-primary-container hover:underline`}>บันทึกคะแนน</Link><Link href={`/grade-planning?courseId=${encodeURIComponent(course.id)}`} className={`${actionClass} inline-flex items-center whitespace-nowrap text-primary-container hover:underline`}>วางแผนเกรด</Link></div></td>
                 </tr>)}</tbody>
               </table>

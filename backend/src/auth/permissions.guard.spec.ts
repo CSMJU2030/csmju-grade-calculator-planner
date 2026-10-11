@@ -126,17 +126,8 @@ describe('PermissionsGuard', () => {
       ).toBe(true);
     });
 
-    it('should deny student', () => {
-      expect(() =>
-        guard.canActivate(
-          createContext({
-            sub: 'user-002',
-            email: 'student@core.local',
-            role: 'student',
-            sid: 'session-002',
-          }),
-        ),
-      ).toThrow(ForbiddenException);
+    it('should allow student to create their own course', () => {
+      expect(guard.canActivate(createContext({ sub: 'student-owner', role: 'student' }))).toBe(true);
     });
 
     it('should deny alumni', () => {
